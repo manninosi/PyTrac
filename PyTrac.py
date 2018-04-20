@@ -3,7 +3,20 @@ import os
 import re
 
 acceptable_cell_number = [100];
-acceptable_end_reaction_types = [9000];
+acceptable_end_reaction_types = [9000, 4000, 5000];
+"""
+##Need to look for 4th column values
+-1: Compton Scattering
+-3: Photoelectric
+-2: Rayleight (DONT CARE)
+
+The energy on the line is the energy of the particle leaving the cell. THus if "-3"
+Just take the initial value. If "-1" do Initial - Final energy. Only need to look
+at the last line. Can ignore "9000".
+
+How to output data:
+Interaction #, NPS, Cell, Energy
+"""
 out_index = 0;
 ignoreLine = 10;
 abnormality_counter = 0;
@@ -37,14 +50,14 @@ def getExistanceIndecies(given_list, acceptable_numbers):
 
 def writeHead(outFile):
 
-  outFile.write('|ID\t\t|NPS\t\t\t\t|Cell_Number\t\t\t\t|Energy(MeV)\n');
+  outFile.write('|ID\t\t\t|NPS\t\t\t|Cell_Number\t\t\t|Energy(MeV)\n');
 
 def getPrintString(NPS, energy):
   global out_index;
   global acceptable_cell_number;
 
   out_index = out_index + 1;
-  sstring =  '|' + str(out_index) + '\t\t|' + str(NPS) + '\t\t\t\t|' + str(acceptable_cell_number[0]) + '\t\t\t\t\t\t|' + str(energy) + '\n';    
+  sstring =  '|' + str(out_index) + '\t\t\t|' + str(NPS) + '\t\t\t|' + str(acceptable_cell_number[0]) + '\t\t\t|' + str(energy) + '\n';    
 
   return sstring;
 
