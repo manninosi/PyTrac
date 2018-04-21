@@ -10,7 +10,7 @@ acceptable_end_reaction_types = [9000, 4000, 5000];
 -3: Photoelectric
 -2: Rayleight (DONT CARE)
 
-The energy on the line is the energy of the particle leaving the cell. THus if "-3"
+The energy on the line is the energy of the particle leaving the cell. Thus if "-3"
 Just take the initial value. If "-1" do Initial - Final energy. Only need to look
 at the last line. Can ignore "9000".
 
