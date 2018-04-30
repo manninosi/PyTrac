@@ -2,7 +2,7 @@ import sys
 import os
 import re
 
-acceptable_cell_number = [100];
+acceptable_cell_number = [600];
 acceptable_end_reaction_types = [9000, 4000, 5000];
 """
 ##Need to look for 4th column values
@@ -23,12 +23,12 @@ abnormality_counter = 0;
 sample_counter = 0;
 
 def checkNumber(number, acceptable_numbers):
-  length = len(acceptable_numbers);
-  for i in range(0, length):
-    if number == acceptable_numbers[i]:
-      return True;
+    length = len(acceptable_numbers);
+    for i in range(0, length):
+        if number == acceptable_numbers[i]:
+            return True;
 
-  return False;
+    return False;
 
 def checkExistance(given_list, acceptable_numbers):
   length = len(acceptable_numbers);
@@ -56,8 +56,8 @@ def getPrintString(NPS, energy):
   global out_index;
   global acceptable_cell_number;
 
-  out_index = out_index + 1;
-  sstring =  '|' + str(out_index) + '\t\t\t|' + str(NPS) + '\t\t\t|' + str(acceptable_cell_number[0]) + '\t\t\t|' + str(energy) + '\n';    
+  out_index += 1;
+  sstring =  '|' + str(out_index) + '\t\t\t|' + str(NPS) + '\t\t\t|' + str(acceptable_cell_number[0]) + '\t\t\t|' + str(energy) + '\n';
 
   return sstring;
 
@@ -90,7 +90,7 @@ def check_validity(sample):
   cell_numbers = sample['cell_numbers'];
   event_count = sample['event_count'];
   event_infos = sample['event_infos'];
-  
+
 
   if checkExistance(cell_numbers, acceptable_cell_number):
     energy = 0;
@@ -129,133 +129,143 @@ def process_experiments(collection, outFile):
       outFile.write(getPrintString(NPS, energy));
 
 def main(args):
-  global abnormality_counter
-  global sample_counter
+    global abnormality_counter
+    global sample_counter
 
-  ''' sample code for calling this program: python lily.py 31_Kev_X-ray_Test.txt out.txt '''
-  file_count = 1
-  adr = os.getcwd() + '/' + args[1];  ''' input file address'''
-  outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
-  try:
-    ignoreLine = int(args[3]);
-  except:
-    ignoreLine = 10;
+    ''' sample code for calling this program: python lily.py 31_Kev_X-ray_Test.txt out.txt '''
+    file_count = 1
+    adr = os.getcwd() + '/' + args[1];  ''' input file address'''
+    outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
+    try:
+        ignoreLine = int(args[3]);
+    except:
+        ignoreLine = 10;
 
-  outFile = open(outAdr, 'w');
-  counter_outFile = open(outAdr+'_counter.counter', 'w');
+    outFile = open(outAdr, 'w');
+    counter_outFile = open(outAdr+'_counter.counter', 'w');
 
-  writeHead(outFile);
+    writeHead(outFile);
 
-  counter = 0;
-  newDataLen = 3;
+    counter = 0;
+    newDataLen = 3;
 
-  NPS = 0;
-  reaction_types = [];
-  cell_numbers = [];
-  event_infos = [];
-  event_count = 0;
-  ignore_counter = 0;
+    NPS = 0;
+    reaction_types = [];
+    cell_numbers = [];
+    event_infos = [];
+    event_count = 0;
+    ignore_counter = 0;
 
-  collection = [];
+    collection = [];
 
-  encounter_error = 0;
-  size_counter = 0
-  for line in open(adr):
-    size_counter += 1
+    encounter_error = 0;
+    size_counter = 0
+    for line in open(adr):
+        size_counter += 1
 
-  ###SECTION OF CODE TO CLEAR OUT COLLECTION VARIABLE TO PREVENT MEMORY OVERFLOW ERROR
-    if size_counter > 10**6: #Increase this value to make individual file writes larger
-      print "Clearing variable cache and writing data file..."
-      counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
-      outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
-      outFile = open(outAdr, 'w');
-      writeHead(outFile);
-      process_experiments(collection, outFile);
-      collection = []
-      size_counter = 0
-      file_count += 1
-  ####
+        ###SECTION OF CODE TO CLEAR OUT COLLECTION VARIABLE TO PREVENT MEMORY OVERFLOW ERROR
+        if size_counter > 10**6: #Increase this value to make individual file writes larger
+            print "Clearing variable cache and writing data file..."
+            counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
+            outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
+            outFile = open(outAdr, 'w');
+            writeHead(outFile);
+            process_experiments(collection, outFile);
+            collection = []
+            size_counter = 0
+            file_count += 1
+            ####
 
-      
-    ignore_counter = ignore_counter + 1;
-    if ignore_counter > ignoreLine:
-      ''' processing the line '''
-      line = line.strip(); ''' remove whitespace of the start of each line '''
-      line = re.sub(" +", " ", line);  ''' remove whitespace among the line using regular expression (+ mean it should contain one for sure) '''
 
-      ''' extracting information '''
-      particle = line.rstrip().split(' '); ''' this line seprate data that exist in one line and represent them as an array (particle) '''
-      #print "New Line \n"
-      #print particle
-      particle_len = len(particle);
-      try:
-        if  particle_len > 1:
-          if particle_len <= newDataLen:
-            sample_counter = sample_counter + 1;
-            if event_count > 0 and encounter_error == 0:
-              
-              sample = {};
+        ignore_counter += 1
+        if ignore_counter > ignoreLine:
 
-              sample.setdefault('NPS', 0);
-              sample['NPS'] = NPS;
+            ''' processing the line '''
+            line = line.strip(); ''' remove whitespace of the start of each line '''
+            line = re.sub(" +", " ", line);  ''' remove whitespace among the line using regular expression (+ mean it should contain one for sure) '''
 
-              sample.setdefault('reaction_types', 0);
-              sample['reaction_types'] = reaction_types;
-              sample.setdefault('cell_numbers', 0);
-              sample['cell_numbers'] = cell_numbers;
-
-              sample.setdefault('event_infos', 0);
-              sample['event_infos'] = event_infos;
-
-              sample.setdefault('event_count', 0);
-              sample['event_count'] = event_count;
-            
-              collection.append(sample);
-
-            ''' reset variables '''
-            encounter_error = 0;
-            counter = 0;
-            event_count = 0;
-            reaction_types = [];
-            cell_numbers = [];
-            event_infos = [];
-            event_count = 0;
-  
+            ''' extracting information '''
+            particle = line.rstrip().split(' '); ''' this line seprate data that exist in one line and represent them as an array (particle) '''
+            #print "New Line \n"
+            # print particle
+            particle_len = len(particle);
             # try:
-            NPS = int(particle[0]);
-            # except:
-            #   print line;
-            #   sys.exit();
+            if  particle_len > 1:
+                if particle_len <= newDataLen:
+                    sample_counter = sample_counter + 1
+                    if event_count > 0 and encounter_error == 0:
 
-          else:
-            if counter % 2 == 1:
-              # try:
-              reaction_types.append(int(particle[0]));
-              cell_numbers.append(int(particle[5]));
-              # except:
-              #   print line;
-              #   sys.exit();
-            else:
-              event_count = event_count + 1;
-              event_infos.append(particle);
+                        sample = {};
 
-      except:
-        abnormality_counter = abnormality_counter + 1;
-        encounter_error = 1;  
-      counter += 1
-  
+                        sample.setdefault('NPS', 0);
+                        sample['NPS'] = NPS;
 
-    
-  print 'end of collecting data ... total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter);
+                        sample.setdefault('reaction_types', 0);
+                        sample['reaction_types'] = reaction_types;
+                        sample.setdefault('cell_numbers', 0);
+                        sample['cell_numbers'] = cell_numbers;
 
-  counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
+                        sample.setdefault('event_infos', 0);
+                        sample['event_infos'] = event_infos;
 
-  print ('start processing collection ...')
+                        sample.setdefault('event_count', 0);
+                        sample['event_count'] = event_count;
+                        # print "sample"
+                        # print "\n"
+                        # print sample
+                        # print "particle\n"
+                        # print particle
+                        # sys.exit()
+                        collection.append(sample);
 
-  outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
-  outFile = open(outAdr, 'w');
-  writeHead(outFile);
-  process_experiments(collection, outFile);
+
+
+                    ''' reset variables '''
+                    encounter_error = 0;
+                    counter = 0;
+                    event_count = 0;
+                    reaction_types = [];
+                    cell_numbers = [];
+                    event_infos = [];
+                    event_count = 0;
+
+                    # try:
+                    NPS = int(particle[0]);
+                    # except:
+                    #   print line;
+                    #   sys.exit();
+
+                else:
+                    if counter % 2 == 1:
+                        # try:
+                        print "Paritlc\n"
+                        print particle
+                        reaction_types.append(int(particle[0]));
+                        cell_numbers.append(int(particle[5]));
+                        # except:
+                        #   print line;
+                        #   sys.exit();
+                    else:
+                        event_count = event_count + 1;
+                        event_infos.append(particle);
+
+                        # except:
+                        #   abnormality_counter = abnormality_counter + 1;
+                        #   encounter_error = 1;
+            counter += 1
+
+
+
+    print 'end of collecting data ... total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter);
+
+    counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
+
+    print ('start processing collection ...')
+
+    outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
+    outFile = open(outAdr, 'w');
+    writeHead(outFile);
+    process_experiments(collection, outFile);
 
 if __name__ == "__main__":
     main(sys.argv)
