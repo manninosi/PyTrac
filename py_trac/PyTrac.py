@@ -54,7 +54,7 @@ def writeHead(outFile):
 #
 def getPrintString(NPS, energy, out_index, cell_number):
 
-  out_index += 1;
+
   sstring =  '|' + str(out_index) + '\t\t\t|' + str(NPS) + '\t\t\t|' + str(cell_number) + '\t\t\t|' + str(energy) + '\n';
 
   return sstring;
@@ -164,6 +164,11 @@ def main(args):
     size_counter = 0
     count = 0
     Flag_Term = 0
+    Compton_Flag = 0
+    Particles = 0
+    Interaction_3000 = 0
+
+    NPS_Check = []
     for line in open(adr):
         size_counter += 1
 
@@ -174,7 +179,10 @@ def main(args):
             outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
             outFile = open(outAdr, 'w');
             writeHead(outFile);
-            process_experiments(collection, outFile);
+            #process_experiments(collection, outFile);
+            for i in collection:
+                 outFile.write(getPrintString(i[1], i[2], i[0], i[3]))
+
             collection = []
             size_counter = 0
             file_count += 1
@@ -193,16 +201,29 @@ def main(args):
             #print "New Line \n"
             # print particle
             particle_len = len(particle);
+            if particle[0] == '3000':
+                Interaction_3000 += 1
             if Flag_Term == 1:
                 Flag_Term = 0
 
 
-                if Line_Number <= 1: #Only surface crossing
+                if Line_Number == 0: #Only surface crossing
 
                     continue
+
+                elif Compton_Flag == 1:
+                    Energy -= float(particle[6])
+                    Line_Number = 0
+                    count += 1
+                    Compton_Flag = 0
+
+                    collection.append([count, NPS, Energy,Cell] )
+                    Energy = 0
+                    NPS = 0
                 else:
                     Line_Number = 0
                     count += 1
+
                     collection.append([count, NPS, Energy,Cell] )
                     Energy = 0
                     NPS = 0
@@ -213,26 +234,37 @@ def main(args):
             if particle[1] == '3000':#Check for 3000 to indicate a new particle being run
                 Interaction = 'None'
                 Line_Number = 0 #Keep track of interactions
-
+                Particles += 1
                 NPS = int(particle[0])
+                NPS_Check.append(NPS)
+
                 continue
             #Check for different intereactions
-            if particle[3] == '-3': #Photoelectric
+            if particle[3] == '-3' and particle[0] != '9000': #Photoelectric
                 Interaction = "Photoelectric"
                 Cell = int(particle[5])
                 Line_Number +=1
                 continue
 
-            elif particle[3] == '-1': #Compton
+            elif particle[3] == '-1' and particle[0] != '9000': #Compton
                 Interaction = "Compton"
-                Cell = particle[5]
+                Cell = int(particle[5])
                 Line_Number +=1
-                continue
+                # if particle[0] == '9000':
+                #     pass
+                # else:
+                #
+                #     continue
             else:
 
                 if particle[0] in ['9000', '5000']:
+                    if Interaction == "Compton":
+                        Compton_Flag = 1
+
+
                     Flag_Term = 1 #Particle has ended
                     Line_Number += 1
+
                     continue
                 elif particle[0] in ['3000', '4000']:
                     Line_Number += 1
@@ -251,83 +283,49 @@ def main(args):
 
 
 
-    #         if  particle_len > 1:
-    #             if particle_len <= newDataLen:
-    #                 sample_counter = sample_counter + 1
-    #                 if event_count > 0 and encounter_error == 0:
-    #
-    #                     sample = {};
-    #
-    #                     sample.setdefault('NPS', 0);
-    #                     sample['NPS'] = NPS;
-    #
-    #                     sample.setdefault('reaction_types', 0);
-    #                     sample['reaction_types'] = reaction_types;
-    #                     sample.setdefault('cell_numbers', 0);
-    #                     sample['cell_numbers'] = cell_numbers;
-    #
-    #                     sample.setdefault('event_infos', 0);
-    #                     sample['event_infos'] = event_infos;
-    #
-    #                     sample.setdefault('event_count', 0);
-    #                     sample['event_count'] = event_count;
-    #                     # print "sample"
-    #                     # print "\n"
-    #                     # print sample
-    #                     # print "particle\n"
-    #                     # print particle
-    #                     # sys.exit()
-    #                     collection.append(sample);
-    #
-    #
-    #
-    #                 ''' reset variables '''
-    #                 encounter_error = 0;
-    #                 counter = 0;
-    #                 event_count = 0;
-    #                 reaction_types = [];
-    #                 cell_numbers = [];
-    #                 event_infos = [];
-    #                 event_count = 0;
-    #
-    #                 # try:
-    #                 NPS = int(particle[0]);
-    #                 # except:
-    #                 #   print line;
-    #                 #   sys.exit();
-    #
-    #             else:
-    #                 if counter % 2 == 1:
-    #                     # try:
-    #                     print "Paritlc\n"
-    #                     print particle
-    #                     reaction_types.append(int(particle[0]));
-    #                     cell_numbers.append(int(particle[5]));
-    #                     # except:
-    #                     #   print line;
-    #                     #   sys.exit();
-    #                 else:
-    #                     event_count = event_count + 1;
-    #                     event_infos.append(particle);
-    #
-    #                     # except:
-    #                     #   abnormality_counter = abnormality_counter + 1;
-    #                     #   encounter_error = 1;
-    #         counter += 1
-    #
-    #
-    #
-    # print 'end of collecting data ... total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter);
+    #print 'end of collecting data ... total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter);
     #
     # counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
     #
-    # print ('start processing collection ...')
+    print ('start processing collection ...')
     #
-    # outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
-    # outFile = open(outAdr, 'w');
-    # writeHead(outFile);
-    # process_experiments(collection, outFile);
+    outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
+    outFile = open(outAdr, 'w');
+    writeHead(outFile);
+    #process_experiments(collection, outFile);
+    for i in collection:
+         outFile.write(getPrintString(i[1], i[2], i[0], i[3]))
 
-    print collection[0:10]
+    collection = []
+    size_counter = 0
+    file_count += 1
+
+
+"""
+SECTION OF CODE BELOW WAS USED TO DEBUG PTRAC PARSING DATA
+"""
+
+
+    # q = 0
+    # for i in range(len(collection)):
+    #     t = i + q
+    #     if collection[i][1] != NPS_Check[t]:
+    #         q += 1
+    #         print "NPS not showing up\n"
+    #         print "Collection values\n"
+    #         print collection[i]
+    #         print "NPS values"
+    #         print NPS_Check[t]
+    #
+    # print "Total New Particles\n"
+    # print Particles
+    # print "Length of Collection\n"
+    # print len(collection)
+    # print collection[400:700]
+    # #print collection[55200:55500]# Checking event 1116528; appears to be writing that particle
+    # print "Last entry in collection\n"
+    # print collection[-1]
+    # print "Times 3000 shows up in first entry\n"
+    # print Interaction_3000
 if __name__ == "__main__":
     main(sys.argv)
