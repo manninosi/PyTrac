@@ -60,74 +60,6 @@ def getPrintString(NPS, energy, out_index, cell_number):
   return sstring;
 
 
-# def process_expriment(NPS, reaction_types, cell_numbers, event_infos, event_count, outFile):
-#   global acceptable_cell_number
-
-#   is_accepted = 1;
-
-#   ''' start of filtering '''
-
-#   if not (checkNumber(reaction_types[event_count-1], acceptable_end_reaction_types)):
-#     is_accepted = 0;
-
-#   if is_accepted == 1:
-#     for i in range(0, event_count):
-#       if not (checkNumber(cell_numbers[i], acceptable_cell_number)):
-#         is_accepted = 0;
-#         break;
-
-#   ''' end of filtering '''
-
-#   if is_accepted == 1:
-#     outFile.write(getPrintString(NPS, reaction_types, cell_numbers, event_infos, event_count));
-
-# def check_validity(sample):
-#
-#   global acceptable_cell_number;
-#
-#   cell_numbers = sample['cell_numbers'];
-#   event_count = sample['event_count'];
-#   event_infos = sample['event_infos'];
-#
-#
-#   if checkExistance(cell_numbers, acceptable_cell_number):
-#     energy = 0;
-#     indecies = getExistanceIndecies(cell_numbers, acceptable_cell_number);
-#     indecies_len = len(indecies);
-#     NPS = sample['NPS'];
-#     if indecies_len == event_count:
-#       ''' all cell_numbers is acceptable '''
-#       info = event_infos[0];
-#       energy = float(info[6]);
-#     elif indecies_len > 0:
-#       for i in range(0,indecies_len):
-#         info = event_infos[indecies[i]];
-#         energy = energy + float(info[6]);
-#         if indecies[i]+1 < event_count:
-#           info = event_infos[indecies[i]+1];
-#           energy = energy - float(info[6]);
-#
-#     return (NPS, energy, 1 if energy > 0 else 0);
-#
-#   return (0, 0, 0);
-
-
-# def process_experiments(collection, outFile):
-#
-#   print ('start processing ............');
-#
-#   collection_len = len(collection);
-#
-#   print ('len of collection:' + str(collection_len))
-#
-#   for i in range(0,collection_len):
-#     (NPS, energy, validity) = check_validity(collection[i]);
-#     if validity == 1:
-#       ''' write into file: '''
-#       outFile.write(getPrintString(NPS, energy));
-
-
-
 def main(args):
 
 
@@ -283,10 +215,7 @@ def main(args):
 
 
 
-    #print 'end of collecting data ... total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter);
-    #
-    # counter_outFile.write('total sample count: ' + str(sample_counter) + ' / abnormal sample count: ' + str(abnormality_counter)+'\n');
-    #
+
     print ('start processing collection ...')
     #
     outAdr = os.getcwd() + '/' + args[2] + "file_"+str(file_count);
