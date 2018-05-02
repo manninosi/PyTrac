@@ -144,13 +144,14 @@ def main(args):
                     continue
 
                 elif Compton_Flag == 1:
-                    Energy -= float(particle[6])
+                    Energy += float(particle[6])
                     Line_Number = 0
                     count += 1
                     Compton_Flag = 0
 
                     collection.append([count, NPS, Energy,Cell] )
                     Energy = 0
+                    Initial_Energy = 0
                     NPS = 0
                 else:
                     Line_Number = 0
@@ -158,6 +159,7 @@ def main(args):
 
                     collection.append([count, NPS, Energy,Cell] )
                     Energy = 0
+                    Initial_Energy = 0
                     NPS = 0
                     #Append ID, NPS, Energy, Cell
                 continue
@@ -182,6 +184,8 @@ def main(args):
                 Interaction = "Compton"
                 Cell = int(particle[5])
                 Line_Number +=1
+            elif particle[3] == '-2':
+                Interaction = "Rayleigh"
                 # if particle[0] == '9000':
                 #     pass
                 # else:
@@ -203,13 +207,21 @@ def main(args):
                     continue
                 else: #Go to lines that contain energy values
                     if Interaction == "None":
-                        Intial_Energy = float(particle[6])
+
+                        Initial_Energy = float(particle[6])
                         Energy = float(particle[6]) #Should capture initial energy
+                    elif Interaction == "Rayleigh":
+                        Energy = Energy
 
                     elif Interaction == "Compton":
+
                         Energy -= float(particle[6])
-                    elif Interaction == "Photoelectric" and float(particle[6]) < Intial_Energy: #Compton scatter occurred before Photoelectric
-                        Energy += float(particle[6])
+                    elif Interaction == "Photoelectric": #Compton scatter occurred before Photoelectric
+                        if Compton_Flag == 1:
+                            Energy += float(particle[6])
+                        else:
+                            Energy = Initial_Energy
+
                     else:
                         Energy = float(particle[6])
 
@@ -225,16 +237,20 @@ def main(args):
     for i in collection:
          outFile.write(getPrintString(i[1], i[2], i[0], i[3]))
 
-    collection = []
+
     size_counter = 0
     file_count += 1
 
 
-"""
-SECTION OF CODE BELOW WAS USED TO DEBUG PTRAC PARSING DATA
-"""
+    """
+    SECTION OF CODE BELOW WAS USED TO DEBUG PTRAC PARSING DATA
+    """
+    for i in range(len(collection)):
 
-
+        if collection[i][2] < 0:
+            print "NPS with negative Energy"
+            print collection[i][1]
+    collection = []
     # q = 0
     # for i in range(len(collection)):
     #     t = i + q
